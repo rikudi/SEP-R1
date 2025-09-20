@@ -1,11 +1,12 @@
-import { render, screen } from '../../utils/test-utils'
+import {render, screen, waitFor} from '../../utils/test-utils'
 import NavBar from "@/components/sections/NavBar";
+import {act} from "react";
+
 jest.mock('@supabase/ssr');
 
 // Mock the useRouter hook
 jest.mock('next/navigation', () => ({
-    useRouter: jest.fn(() => ({
-    })),
+    useRouter: jest.fn(() => ({})),
 }));
 
 // Mock the server-side APIs to avoid errors
@@ -19,27 +20,40 @@ jest.mock('next/headers', () => ({
 }));
 
 describe('NavBar Component', () => {
-    it('renders navbar section with correct content', () => {
-        render(<NavBar />)
+    it('renders navbar section with correct content', async () => {
+        await act(async () => {
+            render(<NavBar/>);
+        });
 
         // Test text in NavBar
-        expect(screen.getByText('LibraryHub')).toBeInTheDocument()
-    })
+        await waitFor(() => {
+            expect(screen.getByText('LibraryHub')).toBeInTheDocument()
+        });
+    });
 
-    it('displays search functionality', () => {
-        render(<NavBar />)
+    it('displays search functionality', async () => {
+        await act(async () => {
+            render(<NavBar/>);
+        });
 
         // Test search input
-        const searchInput = screen.getByPlaceholderText(/Search title, authors, or categories/)
-        expect(searchInput).toBeInTheDocument()
-        expect(searchInput).toHaveAttribute('type', 'text')
-    })
+        await waitFor(() => {
+            const searchInput = screen.getByPlaceholderText(/Search title, authors, or categories/)
+            expect(searchInput).toBeInTheDocument()
+            expect(searchInput).toHaveAttribute('type', 'text')
+        });
+    });
 
-    it('has accessible structure', () => {
-        render(<NavBar />)
+    it('has accessible structure', async () => {
+        await act(async () => {
+            render(<NavBar/>)
+        });
 
         // Test semantic structure
-        expect(screen.getByRole('textbox')).toBeInTheDocument()
-        expect(screen.getByRole('button')).toBeInTheDocument()
-    })
-})
+        await waitFor(() => {
+            expect(screen.getByRole('textbox')).toBeInTheDocument(); // Search input
+            const signInButton = screen.getByRole('button', { name: /Sign In/i });
+            expect(signInButton).toBeInTheDocument();
+        });
+    });
+});
